@@ -1,53 +1,29 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <!-- <style>
-        #liner ::before{
-            color: rgb(49, 92, 109) ;
-            content:"visitor@avii.in:~~$";
-        }
-        </style> -->
-        <link href="styles.css" type="text/css" rel="stylesheet"> 
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body>
-
-        <div id="terminal">
-            <div id="before"></div>
-            <div id="liner">
-                <span id="typer"></span>
-                <span id="cursor"></span>
-            </div>
-            <textarea id="texter" autofocus></textarea>
-        </div>
-        <script src="ai.js"defer></script>
-
-        <!-- <div id="terminal">
-            <a id="before"></a>
-        </div>
-        <div id="command" onclick="focusInput()">
-            <textarea id="texter" onkeyup="typeIt(this, event)" onkeydown="moveIt(this.value.length, event)" autofocus></textarea>
-            <div id="liner">
-                <span id="typer"></span>
-                <span class="cursor" id="cursor">|</span>
-            </div>
-        </div> -->
-        
-         
-        
-    </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Avraj Ingle — Terminal Portfolio</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main id="terminal" role="region" aria-label="Interactive terminal">
+    <div id="output" aria-live="polite"></div>
+    <div id="input-line">
+      <span id="prompt">visitor@avii.in:~$</span>
+      <span id="typed"></span>
+      <span id="cursor" aria-hidden="true"></span>
+      <input
+        id="cmd"
+        type="text"
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+        aria-label="Terminal command input"
+      />
+    </div>
+  </main>
+  <script defer src="ai.js"></script>
+</body>
 </html>
- <!-- 
-// <body>
-//     <div id="terminal">
-//         <a id="before"></a>
-//     </div>
-//     <div id="command" onclick="$('texter').focus()">
-//         <textarea type="text" id="texter" onkeyup="typeIt(this,Event)" onkeydown="typeIt(this,Event); moveIt(this.value.length,Event)" onkeypress="typeIt(this,Event);" autofocus=""></textarea>
-//         <div id="liner">
-//             <span id="typer"></span><b class="cursor" id="cursor" style="left: 0px;">|</b>
-//         </div>
-//     </div>
-   
-//     </body> -->

@@ -1,240 +1,155 @@
-// DOM Elements
-const before = document.getElementById('before');
-const liner = document.getElementById('liner');
-const commandOutput = document.getElementById('typer');
-const textarea = document.getElementById('texter');
-const terminal = document.getElementById('terminal');
-const cursor = document.getElementById('cursor');
+// terminal.js
+document.addEventListener('DOMContentLoaded', () => {
+  const outputEl = document.getElementById('output');
+  const cmdInput = document.getElementById('cmd');
+  const typedEl = document.getElementById('typed');
+  const cursorEl = document.getElementById('cursor');
 
-// Global Variables
-let isPasswordMode = false;
-let isAuthenticated = false;
-let commandHistory = [];
-let historyIndex = 0;
-let currentDirectory = "";
+  const state = {
+    history: [],
+    histIndex: 0,
+    isPwdMode: false,
+    authenticated: false,
+  };
 
-// URLs and Static Data
-const github = "https://github.com/avii2312";
-const linkedin = "https://www.linkedin.com/in/aviraj-ingle-23av23";
-const discord = "https://discord.com/invite/ime_xappu";
-const password = "password";
-const email = "mailto:avraj.ingle@gmail.com";
+  const DATA = {
+    password: 'password',
+    banner: [
+      '<h1 class="command">Avraj Ingle</h1>',
+      '<p class="success">Welcome to my portfolio!</p>',
+      '<p class="success">Type <span class="command">help</span> for commands.</p>',
+      '<br>'
+    ],
+    help: [
+      '<p><span class="command">whois</span>     — About me</p>',
+      '<p><span class="command">whoami</span>    — Who are you?</p>',
+      '<p><span class="command">socials</span>   — My social links</p>',
+      '<p><span class="command">projects</span>  — My projects</p>',
+      '<p><span class="command">secret</span>    — Admin only</p>',
+      '<p><span class="command">history</span>   — Command history</p>',
+      '<p><span class="command">clear</span>     — Clear screen</p>',
+      '<p><span class="command">banner</span>    — Show banner</p>',
+      '<p><span class="command">sudo</span>      — ??</p>',
+      '<br>'
+    ],
+    whois: [
+      '<p>Hello, I\'m Avraj Ingle!</p>',
+      '<p>I love coding and I\'m open to opportunities.</p>',
+      '<br>'
+    ],
+    whoami: ['<p>You are a curious visitor.</p>', '<br>'],
+    socials: [
+      `<p>GitHub: <a class="link" href="https://github.com/avii2312" target="_blank">avii2312</a></p>`,
+      `<p>LinkedIn: <a class="link" href="https://linkedin.com/in/aviraj-ingle-23av23" target="_blank">aviraj-ingle-23av23</a></p>`,
+      `<p>Discord: <a class="link" href="https://discord.com/invite/ime_xappu" target="_blank">ime_xappu</a></p>`,
+      `<p>Email: <a class="link" href="mailto:avraj.ingle@gmail.com">avraj.ingle@gmail.com</a></p>`,
+      '<br>'
+    ],
+    projects: [
+      '<p>Most are private, but here’s my <a class="link" href="https://github.com/avii2312" target="_blank">GitHub</a>.</p>',
+      '<br>'
+    ],
+    secret: [
+      '<p class="error">Admin only: sudo unlocks everything...</p>',
+      '<br>'
+    ]
+  };
 
-const whois = [
-    "<br>",
-    "Hello, I'm Avraj Ingle!",
-    "I like to code and am looking for new opportunities!",
-    "<br>"
-];
+  /** Prints lines with a typing effect */
+  async function printLines(lines, delay = 50) {
+    for (const line of lines) {
+      const p = document.createElement('p');
+      p.innerHTML = line;
+      outputEl.appendChild(p);
+      await new Promise(res => setTimeout(res, delay));
+      outputEl.scrollTop = outputEl.scrollHeight;
+    }
+  }
 
-const whoami = [
-    "<br>",
-    "Visitor.",
-    "<br>"
-];
+  /** Handles an entered command */
+  async function handleCommand(cmd) {
+    state.history.push(cmd);
+    state.histIndex = state.history.length;
+    appendLine(`<span class="prompt">visitor@avii.in:~$</span> ${cmd}`, '');
 
-const socials = [
-    "<br>",
-    `github       <a href="${github}" target="_blank">github/avii2312</a>`,
-    `linkedin     <a href="${linkedin}" target="_blank">linkedin/aviraj-ingle-23av23</a>`,
-    `discord      <a href="${discord}" target="_blank">discord/ime_xappu</a>`,
-    `email        <a href="${email}" target="_blank">email/avraj.ingle@gmail.com</a>`,
-    "<br>"
-];
-
-const secret = [
-    "<br>",
-    '<span class="command">sudo</span> Only use if you\'re admin.',
-    "<br>"
-];
-
-const projects = [
-    "<br>",
-    "Most of my projects are confidential, but only for you, I'll show you my <a href='https://github.com/avii2312' target='_blank'>github/avii2312</a>. Keep it a secret!",
-    "<br>"
-];
-
-const help = [
-    "<br>",
-    '<span class="command">whois</span>     Learn about me.',
-    '<span class="command">whoami</span>    Who are you?',
-    '<span class="command">socials</span>   View my socials.',
-    '<span class="command">projects</span>   View my projects.',
-    '<span class="command">secret</span>    Find a secret.',
-    '<span class="command">history</span>   View command history.',
-    '<span class="command">help</span>      Display this help message.',
-    '<span class="command">email</span>     Want to email me?',
-    '<span class="command">clear</span>     Clear the terminal.',
-    '<span class="command">banner</span>    Display the banner.',
-    '<span class="command">sudo</span>      Dont use this command.',
-    '<span class="command">pwd</span>       Print working directory.',
-    "<br>"
-];
-
-const banner = [
-    '<h1 class="index">Avraj Ingle</h1>',
-    '<span class="color2">Welcome to my portfolio!</span>',
-    '<span class="color2">Looking for opportunities for my skills!</span>',
-    '<span class="color2">Type <span class="command">help</span> to see available commands.</span>',
-    "<br>"
-];
-
-// Initialize Terminal
-textarea.focus();
-setTimeout(() => {
-    loopLines(banner, "", 80);
-    textarea.focus();
-}, 100);
-
-// Event Listeners
-textarea.addEventListener("input", updateCursorPosition);
-textarea.addEventListener("keyup", handleKeyUp);
-// window.addEventListener("keyup", handleKeyUp);
-// textarea.addEventListener("input", updateCursorPosition);
-
-// Handle Key Events
-function handleKeyUp(e) {
-    if (e.keyCode === 181) { // Reload page
-        document.location.reload(true);
+    if (state.isPwdMode) {
+      if (cmd === DATA.password) {
+        state.authenticated = true;
+        await printLines(DATA.secret, 100);
+      } else {
+        appendLine('<p class="error">Wrong password!</p>');
+      }
+      state.isPwdMode = false;
+      return;
     }
 
-    if (isPasswordMode) {
-        handlePasswordInput(e);
-    } else {
-        handleCommandInput(e);
-    }
-}
-
-// Handle Password Input
-function handlePasswordInput(e) {
-    const passwordInput = textarea.value;
-    commandOutput.innerHTML = "*".repeat(passwordInput.length);
-
-    if (e.keyCode === 13) { // Enter key
-        if (passwordInput === password) {
-            isAuthenticated = true;
-            loopLines(secret, "color2 margin", 120);
-        } else {
-            addLine("Really want to know the secret?", "color2 margin", 120);
-        }
-        resetInput();
-        isPasswordMode = false;
-        liner.classList.remove("password");
-    }
-}
-
-// Handle Command Input
-function handleCommandInput(e) {
-    if (e.keyCode === 13) { // Enter key
-        const command = textarea.value.trim();
-        commandHistory.push(command);
-        historyIndex = commandHistory.length;
-
-        addLine(`visitor@avii.in:~/${currentDirectory} $ ${command}`, "no-animation", 0);
-        executeCommand(command.toLowerCase());
-        resetInput();
-    } else if (e.keyCode === 38 && historyIndex > 0) { // Up arrow
-        historyIndex -= 1;
-        textarea.value = commandHistory[historyIndex];
-        commandOutput.innerHTML = textarea.value;
-    } else if (e.keyCode === 40 && historyIndex < commandHistory.length - 1) { // Down arrow
-        historyIndex += 1;
-        textarea.value = commandHistory[historyIndex] || "";
-        commandOutput.innerHTML = textarea.value;
-    }
-}
-
-// Execute Commands
-function executeCommand(cmd) {
     switch (cmd) {
-        case "help":
-            loopLines(help, "color2 margin", 80);
-            break;
-        case "whois":
-            loopLines(whois, "color2 margin", 80);
-            break;
-        case "whoami":
-            loopLines(whoami, "color2 margin", 80);
-            break;
-        case "socials":
-            loopLines(socials, "color2 margin", 80);
-            break;
-        case "projects":
-            loopLines(projects, "color2 margin", 80);
-            break;
-        case "clear":
-            addLine("Huge mistake, bye bye", "color2 margin", 80);
-            setTimeout(function(){ 
-                clearLines();
-            },3000);
-            break;
-        case "history":
-            addLine("<br>","",0);
-            loopLines(commandHistory, "command", 80);
-            addLine("<br>", "command", 80 * commandHistory.length+50);
-            break;    
-        case "sudo":
-            addLine("This command is not allowed.", "error", 80);
-            setTimeout(function(){ 
-                window.open("https://www.youtube.com/watch?v=_2zEqSCD7F4")
-            },1000);
-            break;
-        case "banner":
-            loopLines(banner, "color2 margin", 80);
-            break;
-        case "pwd":
-            addLine(currentDirectory || "~", "color2 margin", 80);
-            break;
-        case "email":
-            addLine("Just send me an email, I'll reply ASAP", "color2 margin", 80);
-            setTimeout(function(){ 
-                window.open("mailto:avraj.ingle@gmail.com");
-            },1000);
-            break;
-        default:
-            addLine(`<span class="inherit">Command not found. Type <span class="command">'help'</span> for a list of commands.</span>`, "error", 80);
+      case 'help':     await printLines(DATA.help);      break;
+      case 'banner':   await printLines(DATA.banner);    break;
+      case 'whois':    await printLines(DATA.whois);     break;
+      case 'whoami':   await printLines(DATA.whoami);    break;
+      case 'socials':  await printLines(DATA.socials);   break;
+      case 'projects': await printLines(DATA.projects);  break;
+      case 'secret':
+        state.isPwdMode = true;
+        appendLine('<p class="success">Enter password:</p>');
+        break;
+      case 'history':
+        DATA.history = state.history.map((c,i) => `<p>${i+1}. ${c}</p>`);
+        await printLines(DATA.history); break;
+      case 'clear':
+        outputEl.innerHTML = '';
+        break;
+      case 'sudo':
+        appendLine('<p class="error">Permission denied: with little power comes... no responsibility.</p>');
+        break;
+      default:
+        appendLine(`<p class="error">Command not found: <code>${cmd}</code>. Type 'help'.</p>`);
     }
-}
+  }
 
-// Reset Input
-function resetInput() {
-    textarea.value = "";
-    commandOutput.innerHTML = "";
-    updateCursorPosition();
-}
+  /** Appends a raw HTML line immediately */
+  function appendLine(html) {
+    const p = document.createElement('p');
+    p.innerHTML = html;
+    outputEl.appendChild(p);
+    outputEl.scrollTop = outputEl.scrollHeight;
+  }
 
-// Add Line to Terminal
-function addLine(text, style, time) {
-    setTimeout(() => {
-        const line = document.createElement("p");
-        line.innerHTML = text.replace(/  /g, "&nbsp;&nbsp;");
-        line.className = style;
-        before.parentNode.insertBefore(line, before);
-        window.scrollTo(0, document.body.offsetHeight);
-    }, time);
-}
+  // INITIALIZE
+  printLines(DATA.banner, 100);
 
-// Loop Lines with Delay
-function loopLines(lines, style, time) {
-    lines.forEach((line, index) => {
-        addLine(line, style, index * time);
-    });
-}
+  // EVENT: key input
+  cmdInput.addEventListener('input', () => {
+    typedEl.textContent = cmdInput.value;
+    cursorEl.style.left = `${typedEl.offsetWidth}px`;
+  });
 
-// Clear Terminal Lines
-function clearLines() {
-    terminal.innerHTML = '<p id="before"></p>';
-    before = document.getElementById('before');
-}
+  cmdInput.addEventListener('keydown', async (e) => {
+    if (e.key === 'Enter') {
+      const cmd = cmdInput.value.trim();
+      cmdInput.value = '';
+      typedEl.textContent = '';
+      await handleCommand(cmd.toLowerCase());
+    }
+    if (e.key === 'ArrowUp' && state.histIndex > 0) {
+      state.histIndex--;
+      cmdInput.value = state.history[state.histIndex] || '';
+      typedEl.textContent = cmdInput.value;
+      cursorEl.style.left = `${typedEl.offsetWidth}px`;
+      e.preventDefault();
+    }
+    if (e.key === 'ArrowDown' && state.histIndex < state.history.length - 1) {
+      state.histIndex++;
+      cmdInput.value = state.history[state.histIndex] || '';
+      typedEl.textContent = cmdInput.value;
+      cursorEl.style.left = `${typedEl.offsetWidth}px`;
+      e.preventDefault();
+    }
+  });
 
-// Update Cursor Position
-function updateCursorPosition() {
-    const textBeforeCursor = textarea.value.substring(0, textarea.selectionStart);
-    const tempSpan = document.createElement('span');
-    tempSpan.style.whiteSpace = 'pre-wrap';
-    tempSpan.textContent = textBeforeCursor;
-    document.body.appendChild(tempSpan);
-    const width = tempSpan.offsetWidth;
-    document.body.removeChild(tempSpan);
-    cursor.style.left = `${width}px`;
-}
+  // FOCUS hack: clicking anywhere focuses the hidden input
+  document.getElementById('terminal').addEventListener('click', () => {
+    cmdInput.focus();
+  });
+});

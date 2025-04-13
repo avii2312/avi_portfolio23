@@ -1,263 +1,62 @@
-/* General Styles */
-body {
-    background-color: black;
-    color: white;
-    font-family: monospace;
-    margin: 0;
-    padding: 20px;
-    overflow-y: scroll;
+/* styles.css */
+/* RESET + BASE */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
-
-#terminal {
-    white-space: pre-wrap;
-    line-height: 1.5;
+html, body {
+  height: 100%;
+  background: #000;
+  color: #eee;
+  font-family: 'Source Code Pro', monospace;
 }
-
-#liner {
-    position: relative;
-    display: inline-block;
-    width: 100%;
+main#terminal {
+  padding: 1rem;
+  max-width: 800px;
+  margin: auto;
+  line-height: 1.5;
+  overflow-y: auto;
+  height: 100vh;
 }
-
-#typer {
-    display: inline-block;
+#output p {
+  margin-bottom: 0.5em;
 }
-
+#input-line {
+  display: flex;
+  align-items: center;
+}
+#prompt {
+  color: #0f0;
+  margin-right: 0.5em;
+}
+#typed {
+  flex: 1;
+}
+#cmd {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
 #cursor {
-    position: absolute;
-    display: inline-block;
-    width: 2px;
-    height: 1em;
-    background-color: white;
-    animation: blink 1s steps(2, start) infinite;
+  width: 1px;
+  height: 1em;
+  background: #eee;
+  animation: blink 1s step-start infinite;
 }
-
 @keyframes blink {
-    50% {
-        opacity: 0;
-    }
+  50% { opacity: 0; }
 }
-
-#texter {
-    opacity: 0;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    resize: none;
-    border: none;
-    outline: none;
-    background: transparent;
-    color: transparent;
-    caret-color: transparent;
+/* COMMAND STYLES */
+.command { color: #0ff; }
+.success { color: #8f8; }
+.error   { color: #f88; }
+.link    { color: #6cf; text-decoration: underline; }
+.margin  { margin-left: 1em; }
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  #prompt { font-size: 0.9rem; }
+  main#terminal { padding: 0.5rem; }
 }
-
-.command {
-    color: cyan;
-}
-
-.color2 {
-    color: lime;
-}
-
-.error {
-    color: red;
-}
-
-.margin {
-    margin-left: 20px;
-}
-
-.no-animation {
-    animation: none;
-}
-
-
-
-
-
-/* 
-body{
-    margin: 0;
-    padding: 15px 20px;
-    min-height: 99%;
-    width: 100%;
-    min-width: 550px;
-    color: rgb(157, 183, 183);
-    background: rgb(14, 11, 11);
-    font-family: cursor,monospace;
-    overflow: hidden;
-}
-
-    ::selection{
-        color: black;
-        background-color: aquamarine;
-    }
-
-    ::-moz-selection{
-        color: black;
-        background-color: aquamarine;
-    }
-
-    textarea{
-    left: -1000px;
-    position: absolute;
-
-    top: -1000px; 
-    }
-
-    b{
-        font-weight: bold;
-    }
-
-    .cursor{
-        font-size: 12px;
-        color:#73ABAD;
-        background-color: aliceblue;
-        position: relative;
-        opacity: 1;
-        height: 1, 5em;
-        width: 10px;
-        max-width: 10px;
-        transform: translateY(4px);
-        overflow: hidden;
-        text-indent: -5px;
-        display: inline-block;
-        text-decoration: blink;
-        animation: blinker 1s linear infinite;
-        
-    }
-
-    @keyframes blinker{
-        50%{
-            opacity: 0;
-        }
-    }
-
-
-    #command{
-        cursor: text;
-        height: 50px;
-        color: #73ABAD;
-    }
-
-    #folder{
-        cursor: text;
-        height: 50px;
-        color: #73ABAD;
-    }
-
-    #liner{
-        line-height: 1.3em;
-        margin-top: -2px;
-        animation: show 0.5s ease forwards;
-        animation-delay: 1.5s;
-        opacity: 0;
-
-    }
-
-    #liner.password::before{
-        content: "password:";
-    }
-
-
-    @keyframes show{
-        from{
-            opacity: 0;
-        }
-        to{
-            opacity: 1;
-        }
-    }
-
-    p{
-    display: block;
-    line-height: 1.3em;
-    margin: 0;
-    overflow: hidden;
-    white-space: normal;
-    letter-spacing: 0.05em;
-    animation: typing 0.5s steps(30,end);
-        
-    }
-
-    .no-animation{
-        animation: typing 0 steps(30,end);
-    }
-
-    .margin{
-        margin-left: 20px;
-    }
-
-    @keyframes typing{
-        from{
-            width: 0;
-        }
-        to{
-            width: 100%;
-        }
-    }
-
-    .index{
-        color: #dcdccd;
-    }
-    .color2{
-        color: #bb9076;
-    }
-
-    .command {
-        color: #73ABAD;
-        text-shadow: 0 0 5px #73ABAD;
-    }
-
-    .folder{
-        color: #73ABAD;
-        text-shadow: 0 0 5px #73ABAD;
-    }
-
-    .error{
-        color: #bb9076;
-    }
-
-    .white{
-        color: #fff;
-    }
-
-    .inherit,
-    a {
-        color: #9c8394;
-    }
-    a{
-        text-decoration: inherit;
-    }
-    a:hover{
-        background: #73ABAD;
-        color: #211830;
-    }
-    a:focus{
-        outline: 0;
-    }
-
-    @media only screen and (max-width: 550px){
-        body{
-            padding: 20px;
-            min-width: unset;
-        }    
-        #command{
-            height: 100px;
-        }
-        #folder{
-            height: 100px;
-        }
-        #liner::before{
-            content: "visitor@avii.in:~~$";
-        }
-        .cursor{
-            width: 5px;
-            max-width: 5px;
-        }
-        p{
-            font-size: 14px;
-        }    
-    } */
